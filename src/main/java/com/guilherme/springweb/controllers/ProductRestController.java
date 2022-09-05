@@ -2,6 +2,8 @@ package com.guilherme.springweb.controllers;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.guilherme.springweb.entities.Product;
 import com.guilherme.springweb.repos.ProductRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Product Rest Endpoint")
 public class ProductRestController {
     
     @Autowired
@@ -33,13 +41,14 @@ public class ProductRestController {
     @RequestMapping(value = "/products/{id}", method = RequestMethod.GET)
     @Transactional(readOnly = true)
     @Cacheable("product-cache")
-    public Product getProduct(@PathVariable("id") int id) {
+    @Operation(summary = "Returns a product", description = "Takes Id returns single product")
+    public @ApiResponse(description = "Product Object") Product getProduct(@Parameter(description = "Id Of The Product") @PathVariable("id") int id) {
         LOGGER.info("Finding product by ID: " + id);
         return repository.findById(id).get();
     }
 
     @RequestMapping(value = "/products", method = RequestMethod.POST)
-    public Product createProduct(@RequestBody Product product) {
+    public Product createProduct(@Valid @RequestBody Product product) {
         return repository.save(product);
     }
 
